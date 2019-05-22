@@ -13,6 +13,7 @@ Terraform version v0.11.14
 1. First of all clone git repository https://github.com/valafon/terraform.git to one of your directories, than move inside it. All config files wrote with relative paths, so every actions should be made inside cloned directory of git repository.
 
 2. Fill variables in file variables.tf . You must to fill access_key and secret_key. You can get this key from iam user inside AWS console, who have rights to create instances, vpc, keys and other stuff on eu-central-1 AWS region. Easier to check it with full admin rights. Optionally you can define db_instance variables such as db_name, username and password. Further they would be used to test connectivity from docker container inside main aws instance to connect postgresql via php_psql module. 
+I suggest you to use defaults, except access_key and secret_key to avoid any errors.
 
 3. Launch "terraform init". Wait when it will be executed. Then launch "terraform plan" to check, if it starts without errors. If everything is fine, launch "terraform apply". When terraform asking to type "yes", type it. Wait, until everything would be created. You would understand, that it's created with output of IP address of instance and db_instance hostname. During terraform launch you need to provide name for your key and path to your public key (usually it's $HOME/.ssh/id_rsa.pub. If you don't have it, you may use ssh-keygen command). After installing AWS instance you would be able to connect straight to it using your private key which is pair of that public key.
 
