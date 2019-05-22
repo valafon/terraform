@@ -131,7 +131,7 @@ resource "aws_instance" "web" {
   # subnet_id to launch
   subnet_id = "${aws_subnet.default.id}"
 
-  # workdaround for dpkg hanging
+  # workaround for dpkg hanging
   provisioner "remote-exec" {
     inline = [
       "sudo systemctl disable apt-daily.service",
