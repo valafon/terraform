@@ -131,6 +131,15 @@ resource "aws_instance" "web" {
   # subnet_id to launch
   subnet_id = "${aws_subnet.default.id}"
 
+  # workdarong for dpkg hanging
+  provisioner "remote-exec" {
+    inline = [
+      "echo 'APT::Periodic::Enable "0";' > /etc/apt/apt.conf.d/10periodic",
+      "sleep 60",
+      "sudo apt-get -y update",
+    ]
+  }
+
 }
   # creating db instance
 
