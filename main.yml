@@ -1,0 +1,95 @@
+- hosts: instance
+  tasks:
+  - name: Add Docker GPG key
+    apt_key: url=https://download.docker.com/linux/ubuntu/gpg
+    become: true
+
+  - name: Add Docker APT repository
+    apt_repository:
+      repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ansible_distribution_release}} stable
+    become: true
+
+  - name: packages install
+    apt:
+      name: ['apt-transport-https','ca-certificates','curl','software-properties-common','docker-ce','postgresql-client-common','postgresql-client']
+      state: present
+      update_cache: yes
+    register: apt_status
+    until: apt_status|success
+    delay: 15
+    retries: 5
+    become: true
+
+  - name: Install pip packages for docker module
+    pip:
+      name: docker-py
+      state: present
+    become: true
+   
+  - name: install psycopg2 for ansible module
+    apt: 
+      name: ['libpq-dev','python-psycopg2']
+      state: present
+      update_cache: yes
+    become: true
+
+  - name: Create a directory if it does not exist
+    file:
+      path: /var/www/html
+      state: directory
+      mode: '0755'
+    become: true
+
+  - name: template index.php to docker container
+    template:
+      src: index.php.j2
+      dest: /var/www/html/index.php
+    become: true
+
+  - name: Add apache container
+    docker_container:
+      name: apache
+      image: docker.io/valafon/apache
+      state: started
+      ports: "0.0.0.0:80:80/tcp"
+      volumes:
+        - /var/www/html:/var/www/html
+      restart_policy: always
+    become: true
+
+  - name: revoke privileges on database from public schema for postgres DB
+    postgresql_query:
+      db: postgres
+      login_host: '{{ login_host }}'
+      login_user: '{{ login_user }}'
+      login_password: '{{ login_password }}'
+      query: REVOKE ALL PRIVILEGES ON DATABASE postgres FROM public;
+
+  - name: Create a new database with name "app"
+    postgresql_db:
+      login_host: '{{ login_host }}'
+      login_user: '{{ login_user }}'
+      login_password: '{{ login_password }}'
+      state: present
+      name: app
+
+  - name: Create user "app"
+    postgresql_user:
+      db: app
+      login_host: '{{ login_host }}'
+      login_user: '{{ login_user }}'
+      login_password: '{{ login_password }}'
+      name: "app"
+      password: "app"
+      priv: "CONNECT"
+
+  - name: Give privileges for user "app" for database "app"
+    postgresql_privs:
+      db: app
+      state: present
+      login_host: '{{ login_host }}'
+      login_user: '{{ login_user }}'
+      login_password: '{{ login_password }}'
+      role: myappuser
+      objs: ALL_IN_SCHEMA
+      privs: SELECT,INSERT,UPDATE,DELETE
