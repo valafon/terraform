@@ -135,6 +135,10 @@ resource "aws_instance" "web" {
   provisioner "remote-exec" {
     inline = [
       "echo 'APT::Periodic::Enable "0";' > /etc/apt/apt.conf.d/10periodic",
+      "sudo systemctl disable apt-daily.service",
+      "sudo systemctl stop apt-daily.service",
+      "sudo systemctl disable apt-daily.timer",
+      "sudo systemctl stop apt-daily.timer",
       "sleep 60",
       "sudo apt-get -y update",
     ]
