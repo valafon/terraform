@@ -131,11 +131,11 @@ resource "aws_instance" "web" {
   # subnet_id to launch
   subnet_id = "${aws_subnet.default.id}"
 
-  # update repositories when creating instance
+  # update repositories when creating instance. Sleep possible workaround for hanging instance.
   provisioner "remote-exec" {
     inline = [
+      "sleep 120",
       "sudo apt-get -y update",
-      "sleep 60",
     ]
   }
 }
