@@ -131,15 +131,6 @@ resource "aws_instance" "web" {
   # subnet_id to launch
   subnet_id = "${aws_subnet.default.id}"
 
-  # update repositories when creating instance. Disabling apt-daily workarong with bug on ubuntu dpkg hanging.
-  provisioner "remote-exec" {
-    inline = [
-      "systemctl disable apt-daily.service",
-      "systemctl disable apt-daily.timer",
-      "sleep 60",
-      "sudo apt-get -y update",
-    ]
-  }
 }
   # creating db instance
 
